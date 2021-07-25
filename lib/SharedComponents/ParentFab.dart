@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:seedr/provider/SeedrController.dart';
 import 'package:seedr/screen/HomeFiles/components/AddTorrentDialog.dart';
-import 'package:provider/provider.dart';
 
 class MyParent extends StatelessWidget {
   final Widget child;
   const MyParent({Key? key, required this.child}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    SeedrController _controller = context.read<SeedrController>();
+    // SeedrController _controller = context.read<SeedrController>();
     return Stack(
       children: <Widget>[
         child,
@@ -20,7 +18,7 @@ class MyParent extends StatelessWidget {
             label: Text("Add"),
             icon: Icon(Icons.add),
             onPressed: () async {
-              await ShowTorrentDialog(context, _controller);
+              await ShowTorrentDialog(context);
             },
           ),
         )

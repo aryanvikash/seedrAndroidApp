@@ -1,8 +1,11 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:seedr/constants.dart';
+
+enum ItemType { folder, file, torrent }
 
 class ApiService {
   late Dio dio;
@@ -25,7 +28,7 @@ class ApiService {
         },
         baseUrl: base_url + "content.php?action=",
         contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-        connectTimeout: 5000,
+        connectTimeout: 10000,
         sendTimeout: 5000);
     this.dio = Dio(this.options);
   }
@@ -61,15 +64,25 @@ class ApiService {
       var res = await dio.post("list_contents",
           data: {"content_id": folderId.toString(), "content-type": "folder"});
 
-      print(res.data);
       return res.data;
     } catch (e) {
       throw Exception(e);
     }
   }
 
+  // ignore: non_constant_identifier_names
+  Future get_urlto_magnet(url) async {
+    final res = await dio.post("scan_page", data: {url: url});
+
+    if (res.data.length > 0) {
+      return res.data;
+    }
+  }
+
   Future getFileDownloadLink(id) async {
     var res = await dio.post("fetch_file", data: {"folder_file_id": id});
+
+    print(res.data);
     return res.data;
   }
 
@@ -83,10 +96,10 @@ class ApiService {
     return res.data;
   }
 
-  deleteItem(id, {type = "folder"}) async {
+  delete(id, ItemType itemtype) async {
     var res = await dio.post("delete", data: {
       "delete_arr": jsonEncode([
-        {"type": type, "id": id}
+        {"type": describeEnum(itemtype), "id": id}
       ])
     });
     return res.data;

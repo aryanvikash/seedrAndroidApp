@@ -9,15 +9,28 @@ class SeedrController extends ChangeNotifier {
 
   var insideFolderitems = [];
   var api = ApiService();
+  var currentFolderId = 0;
 
-  void fetchAllFolder() async {
-    Allfolders.clear();
+  Future fetchAllFolder() async {
     api.ListFolderItems("178129190");
     var data = await api.fetchfiles();
 
+    Allfolders.clear();
     try {
-      data["folders"]?.forEach((folder) => Allfolders.add(folder));
-      data["files"]?.forEach((file) => Allfolders.add(file));
+      data["folders"]?.forEach((folder) {
+        folder["isfolder"] = true;
+        Allfolders.add(folder);
+      });
+      data["files"]?.forEach((file) {
+        file["isfile"] = true;
+        Allfolders.add(file);
+      });
+
+      data["torrents"].forEach((torrent) {
+        torrent["istorrent"] = true;
+        print(torrent);
+        Allfolders.add(torrent);
+      });
       notifyListeners();
     } catch (e) {
       print(e);
@@ -25,12 +38,22 @@ class SeedrController extends ChangeNotifier {
   }
 
   getFolderContents(folderId) async {
+    currentFolderId = folderId;
+
     try {
       insideFolderitems.clear();
       var items = await api.ListFolderItems(folderId);
 
-      items["folders"].forEach((item) => insideFolderitems.add(item));
-      items["files"].forEach((item) => insideFolderitems.add(item));
+      items["folders"].forEach((item) {
+        item["isfolder"] = true;
+        insideFolderitems.add(item);
+      });
+
+      items["files"].forEach((item) {
+        item["isfile"] = true;
+        insideFolderitems.add(item);
+      });
+
       notifyListeners();
     } catch (e) {
       print(e);
@@ -38,9 +61,10 @@ class SeedrController extends ChangeNotifier {
   }
 
   Future getFileDownloadLink(id) async {
+    print(id);
     try {
       var res = await api.getFileDownloadLink(id);
-      return res.url;
+      return res["url"];
     } catch (e) {
       showToast(e);
     }
@@ -54,23 +78,36 @@ class SeedrController extends ChangeNotifier {
       return;
     }
     showToast("${res["title"]} added");
+    fetchAllFolder();
   }
 
-  deleteTorrent(id, {type = "folder"}) async {
-    var res = await api.deleteItem(id);
-    print(res);
-    showToast(res["result"].toString());
+  getFolderLinks(id) async {
+    try {
+      var res = await api.getFolderDownloadLink(id);
+      
+      return res["archive_url"];
+    } catch (e) {
+      showToast(e, type: "error");
+    }
+  }
+
+  delete(id, ItemType itemtype) async {
+    try {
+      var res = await api.delete(id, itemtype);
+      print(res);
+      showToast("Deleted Successfully");
+    } catch (e) {
+      showToast(e.toString(), type: "error");
+    }
   }
 
   showToast(message, {String type = "success"}) {
     Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP_RIGHT,
         timeInSecForIosWeb: 1,
-        backgroundColor:
-            type == "error" ? Colors.redAccent : Colors.greenAccent,
+        backgroundColor: type == "error" ? Colors.redAccent : Colors.green,
         textColor: Colors.white,
-        fontSize: 16.0);
+        fontSize: 18.0);
   }
 }

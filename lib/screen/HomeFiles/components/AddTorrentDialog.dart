@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:seedr/provider/SeedrController.dart';
+import "package:provider/provider.dart";
 
-Future ShowTorrentDialog(
-    BuildContext context, SeedrController seedrcontroller) async {
+// ignore: non_constant_identifier_names
+Future ShowTorrentDialog(BuildContext context) async {
   var _controller = TextEditingController();
   showDialog(
     context: context,
     builder: (BuildContext context) {
+      SeedrController _seedrController = context.read<SeedrController>();
       // return object of type Dialog
       return AlertDialog(
         backgroundColor: Colors.grey[900],
         title: Center(
           child: Text(
-            "Upload Magnet/Torrent Url",
+            "Upload Torrent URL or Magnet Link",
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -50,10 +52,11 @@ Future ShowTorrentDialog(
                   IconButton(
                     icon: Icon(
                       Icons.upload_file,
-                      color: Colors.amber,
+                      color: Colors.white,
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
+                      _seedrController.showToast("Coming soon !!");
                     },
                   ),
                   TextButton(
@@ -63,7 +66,9 @@ Future ShowTorrentDialog(
                       var _magnet = _controller.text.toString().trim();
 
                       if (RegExp(r"^magnet:\?xt=").hasMatch(_magnet)) {
-                        await seedrcontroller.addTorrent(_magnet);
+                        _seedrController.addTorrent(_magnet);
+                        // seedrcontroller.addTorrent(magnet)
+
                         Navigator.of(context).pop();
                       }
 

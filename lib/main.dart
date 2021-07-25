@@ -6,7 +6,7 @@ import 'package:seedr/WebView.dart';
 import 'package:seedr/provider/SeedrController.dart';
 import 'package:seedr/screen/FolderContents/FolderContents.dart';
 import 'package:seedr/screen/SpalashScreen.dart';
-import 'package:seedr/screen/HomeFiles/files.dart';
+import 'package:seedr/screen/HomeFiles/Homefiles.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
